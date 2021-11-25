@@ -657,6 +657,7 @@ class SNSTest(unittest.TestCase):
         self.assertEqual(topic_arn_params[4], TEST_AWS_ACCOUNT_ID)
         self.assertEqual(topic_arn_params[5], TEST_TOPIC_NAME)
 
+    @pytest.mark.failing_offline
     def test_publish_message_by_target_arn(self):
         self.unsubscribe_all_from_sns()
 

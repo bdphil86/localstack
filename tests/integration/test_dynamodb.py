@@ -5,6 +5,7 @@ import unittest
 from datetime import datetime
 from time import sleep
 
+import pytest
 from boto3.dynamodb.conditions import Key
 from boto3.dynamodb.types import STRING
 
@@ -771,6 +772,7 @@ class TestDynamoDB(unittest.TestCase):
 
         self.assertIn("ResourceNotFoundException", str(ctx.exception))
 
+    @pytest.mark.failing_offline
     def test_dynamodb_stream_to_lambda(self):
         table_name = "ddb-table-%s" % short_uid()
         function_name = "func-%s" % short_uid()

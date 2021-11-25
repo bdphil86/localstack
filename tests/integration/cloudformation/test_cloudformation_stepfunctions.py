@@ -1,5 +1,7 @@
 import os
 
+import pytest
+
 from localstack.utils.common import short_uid
 from localstack.utils.generic.wait_utils import wait_until
 from tests.integration.cloudformation.test_cloudformation_changesets import load_template_raw
@@ -7,6 +9,7 @@ from tests.integration.cloudformation.test_cloudformation_changesets import load
 THIS_FOLDER = os.path.dirname(os.path.realpath(__file__))
 
 
+@pytest.mark.failing_offline
 def test_statemachine_definitionsubstitution(
     cfn_client,
     lambda_client,

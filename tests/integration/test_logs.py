@@ -2,6 +2,8 @@
 import unittest
 from datetime import datetime, timedelta
 
+import pytest
+
 from localstack.constants import APPLICATION_AMZ_JSON_1_1
 from localstack.services.awslambda.lambda_api import func_arn
 from localstack.services.awslambda.lambda_utils import LAMBDA_RUNTIME_PYTHON36
@@ -86,6 +88,7 @@ class CloudWatchLogsTest(unittest.TestCase):
         # clean up
         self.logs_client.delete_log_group(logGroupName=group)
 
+    @pytest.mark.failing_offline
     def test_put_subscription_filter_lambda(self):
         lambda_client = aws_stack.connect_to_service("lambda")
 

@@ -7,6 +7,7 @@ import unittest
 from collections import namedtuple
 from typing import Callable, Optional
 
+import pytest
 import xmltodict
 from botocore.exceptions import ClientError
 from jsonpatch import apply_patch
@@ -310,17 +311,20 @@ class TestAPIGateway(unittest.TestCase):
         config.DISABLE_CUSTOM_CORS_APIGATEWAY = old_config
         proxy.stop()
 
+    @pytest.mark.failing_offline
     def test_api_gateway_lambda_proxy_integration(self):
         self._test_api_gateway_lambda_proxy_integration(
             self.TEST_LAMBDA_PROXY_BACKEND, self.API_PATH_LAMBDA_PROXY_BACKEND
         )
 
+    @pytest.mark.failing_offline
     def test_api_gateway_lambda_proxy_integration_with_path_param(self):
         self._test_api_gateway_lambda_proxy_integration(
             self.TEST_LAMBDA_PROXY_BACKEND_WITH_PATH_PARAM,
             self.API_PATH_LAMBDA_PROXY_BACKEND_WITH_PATH_PARAM,
         )
 
+    @pytest.mark.failing_offline
     def test_api_gateway_lambda_proxy_integration_with_is_base_64_encoded(self):
         # Test the case where `isBase64Encoded` is enabled.
         content = b"hello, please base64 encode me"
@@ -451,12 +455,14 @@ class TestAPIGateway(unittest.TestCase):
         result = requests.post(url, data=json.dumps({"return_raw_body": body_msg}))
         self.assertEqual(body_msg, to_str(result.content))
 
+    @pytest.mark.failing_offline
     def test_api_gateway_lambda_proxy_integration_any_method(self):
         self._test_api_gateway_lambda_proxy_integration_any_method(
             self.TEST_LAMBDA_PROXY_BACKEND_ANY_METHOD,
             self.API_PATH_LAMBDA_PROXY_BACKEND_ANY_METHOD,
         )
 
+    @pytest.mark.failing_offline
     def test_api_gateway_lambda_proxy_integration_any_method_with_path_param(self):
         self._test_api_gateway_lambda_proxy_integration_any_method(
             self.TEST_LAMBDA_PROXY_BACKEND_ANY_METHOD_WITH_PATH_PARAM,
@@ -505,6 +511,7 @@ class TestAPIGateway(unittest.TestCase):
 
         self.assertRaises(Exception, apig.get_authorizer, self.TEST_API_GATEWAY_ID, authorizer_id)
 
+    @pytest.mark.failing_offline
     def test_apigateway_with_lambda_integration(self):
         apigw_client = aws_stack.connect_to_service("apigateway")
 
@@ -1138,6 +1145,7 @@ class TestAPIGateway(unittest.TestCase):
         # clean up
         client.delete_rest_api(restApiId=rest_api_id)
 
+    @pytest.mark.failing_offline
     def test_step_function_integrations(self):
         client = aws_stack.connect_to_service("apigateway")
         sfn_client = aws_stack.connect_to_service("stepfunctions")
@@ -1287,6 +1295,7 @@ class TestAPIGateway(unittest.TestCase):
         lambda_client.delete_function(FunctionName=fn_name)
         client.delete_rest_api(restApiId=rest_api["id"])
 
+    @pytest.mark.failing_offline
     def test_api_gateway_http_integration_with_path_request_parameter(self):
         client = aws_stack.connect_to_service("apigateway")
         test_port = get_free_tcp_port()
@@ -1524,6 +1533,7 @@ class TestAPIGateway(unittest.TestCase):
             handler_file=TEST_LAMBDA_PYTHON, libs=TEST_LAMBDA_LIBS, func_name=fn_name
         )
 
+    @pytest.mark.failing_offline
     def test_apigw_test_invoke_method_api(self):
         client = aws_stack.connect_to_service("apigateway")
         lambda_client = aws_stack.connect_to_service("lambda")

@@ -1,6 +1,7 @@
 import logging
 import unittest
 
+import pytest
 import requests
 
 from localstack import config
@@ -58,6 +59,7 @@ class TestProxyServer(unittest.TestCase):
         self.assertFalse(is_port_open(proxy_port))
 
 
+@pytest.mark.failing_offline
 def test_ssl_proxy_server():
     class MyListener(ProxyListener):
         def forward_request(self, *args, **kwargs):

@@ -92,6 +92,7 @@ def create_network():
 
 
 class TestDockerClient:
+    @pytest.mark.failing_offline
     def test_container_lifecycle_commands(self, docker_client: ContainerClient):
         container_name = _random_container_name()
         output = docker_client.create_container(
@@ -114,6 +115,7 @@ class TestDockerClient:
             container_name
         )
 
+    @pytest.mark.failing_offline
     def test_create_container_remove_removes_container(
         self, docker_client: ContainerClient, create_container
     ):
@@ -131,10 +133,12 @@ class TestDockerClient:
         # it takes a while for it to be removed
         assert "foobar" in output
 
+    @pytest.mark.failing_offline
     def test_create_container_non_existing_image(self, docker_client: ContainerClient):
         with pytest.raises(NoSuchImage):
             docker_client.create_container("this_image_does_hopefully_not_exist_42069")
 
+    @pytest.mark.failing_offline
     def test_exec_in_container(
         self, docker_client: ContainerClient, dummy_container: ContainerInfo
     ):
@@ -146,6 +150,7 @@ class TestDockerClient:
         output = output.decode(config.DEFAULT_ENCODING)
         assert "foobar" == output.strip()
 
+    @pytest.mark.failing_offline
     def test_exec_in_container_not_running_raises_exception(
         self, docker_client: ContainerClient, dummy_container
     ):
@@ -155,6 +160,7 @@ class TestDockerClient:
                 dummy_container.container_id, command=["echo", "foobar"]
             )
 
+    @pytest.mark.failing_offline
     def test_exec_in_container_with_env(self, docker_client: ContainerClient, dummy_container):
         docker_client.start_container(dummy_container.container_id)
 
@@ -166,6 +172,7 @@ class TestDockerClient:
         output = output.decode(config.DEFAULT_ENCODING)
         assert "MYVAR=foo_var" in output
 
+    @pytest.mark.failing_offline
     def test_exec_error_in_container(self, docker_client: ContainerClient, dummy_container):
         docker_client.start_container(dummy_container.container_id)
 
@@ -176,6 +183,7 @@ class TestDockerClient:
 
         assert ex.match("doesnotexist: no such file or directory")
 
+    @pytest.mark.failing_offline
     def test_create_container_with_max_env_vars(
         self, docker_client: ContainerClient, create_container
     ):
@@ -193,6 +201,7 @@ class TestDockerClient:
         assert "IVAR_01000=VAL_01000" in output
         assert "IVAR_01999=VAL_01999" in output
 
+    @pytest.mark.failing_offline
     def test_run_container(self, docker_client: ContainerClient):
         container_name = _random_container_name()
         try:
@@ -230,21 +239,25 @@ class TestDockerClient:
         with pytest.raises(NoSuchContainer):
             docker_client.start_container("this_container_does_not_exist")
 
+    @pytest.mark.failing_offline
     def test_get_network(self, docker_client: ContainerClient, dummy_container):
         n = docker_client.get_network(dummy_container.container_name)
         assert "default" == n
 
+    @pytest.mark.failing_offline
     def test_create_with_host_network(self, docker_client: ContainerClient, create_container):
         info = create_container("alpine", network="host")
         network = docker_client.get_network(info.container_name)
         assert "host" == network
 
+    @pytest.mark.failing_offline
     def test_create_with_port_mapping(self, docker_client: ContainerClient, create_container):
         ports = PortMappings()
         ports.add(45122, 22)
         ports.add(45180, 80)
         create_container("alpine", ports=ports)
 
+    @pytest.mark.failing_offline
     def test_create_with_volume(self, tmpdir, docker_client: ContainerClient, create_container):
         mount_volumes = [(tmpdir.realpath(), "/tmp/mypath")]
 
@@ -257,6 +270,7 @@ class TestDockerClient:
 
         assert tmpdir.join("foo.log").isfile(), "foo.log was not created in mounted dir"
 
+    @pytest.mark.failing_offline
     def test_copy_into_container(self, tmpdir, docker_client: ContainerClient, create_container):
         local_path = tmpdir.join("myfile.txt")
         container_path = "/tmp/myfile_differentpath.txt"
@@ -280,6 +294,7 @@ class TestDockerClient:
                 "hopefully_non_existent_container_%s" % short_uid(), str(file_path), "test_file"
             )
 
+    @pytest.mark.failing_offline
     def test_copy_into_container_without_target_filename(
         self, tmpdir, docker_client: ContainerClient, create_container
     ):
@@ -295,6 +310,7 @@ class TestDockerClient:
             container_path,
         )
 
+    @pytest.mark.failing_offline
     def test_copy_directory_into_container(
         self, tmpdir, docker_client: ContainerClient, create_container
     ):
@@ -328,6 +344,7 @@ class TestDockerClient:
 
         assert "foobared" in output
 
+    @pytest.mark.failing_offline
     def test_copy_into_container_with_existing_target(
         self, tmpdir, docker_client: ContainerClient, dummy_container
     ):
@@ -362,6 +379,7 @@ class TestDockerClient:
         )
         assert "foo" in out.decode(config.DEFAULT_ENCODING)
 
+    @pytest.mark.failing_offline
     def test_copy_directory_content_into_container(
         self, tmpdir, docker_client: ContainerClient, dummy_container
     ):
@@ -397,6 +415,7 @@ class TestDockerClient:
         with pytest.raises(ContainerException):
             docker_client.get_network("this_container_does_not_exist")
 
+    @pytest.mark.failing_offline
     def test_list_containers(self, docker_client: ContainerClient, create_container):
         c1 = create_container("alpine", command=["echo", "1"])
         c2 = create_container("alpine", command=["echo", "2"])
@@ -420,6 +439,7 @@ class TestDockerClient:
         with pytest.raises(ContainerException):
             docker_client.list_containers(filter="illegalfilter=foobar")
 
+    @pytest.mark.failing_offline
     def test_list_containers_filter(self, docker_client: ContainerClient, create_container):
         name_prefix = "filter_tests_"
         cn1 = name_prefix + _random_container_name()
@@ -455,6 +475,7 @@ class TestDockerClient:
         assert 1 == len(container_list)
         assert c1.container_name == container_list[0]["name"]
 
+    @pytest.mark.failing_offline
     def test_get_container_entrypoint(self, docker_client: ContainerClient):
         entrypoint = docker_client.get_image_entrypoint("alpine")
         assert "" == entrypoint
@@ -463,6 +484,7 @@ class TestDockerClient:
         with pytest.raises(NoSuchImage):
             docker_client.get_image_entrypoint("thisdoesnotexist")
 
+    @pytest.mark.failing_offline
     def test_get_container_command(self, docker_client: ContainerClient):
         command = docker_client.get_image_cmd("alpine")
         assert "/bin/sh" == command
@@ -471,6 +493,7 @@ class TestDockerClient:
         with pytest.raises(NoSuchImage):
             docker_client.get_image_cmd("thisdoesnotexist")
 
+    @pytest.mark.failing_offline
     def test_create_start_container_with_stdin_to_stdout(self, docker_client: ContainerClient):
         container_name = _random_container_name()
         message = "test_message_stdin"
@@ -491,6 +514,7 @@ class TestDockerClient:
             docker_client.remove_container(container_name)
             pass
 
+    @pytest.mark.failing_offline
     def test_create_start_container_with_stdin_to_file(
         self, tmpdir, docker_client: ContainerClient
     ):
@@ -514,6 +538,7 @@ class TestDockerClient:
         finally:
             docker_client.remove_container(container_name)
 
+    @pytest.mark.failing_offline
     def test_run_container_with_stdin(self, docker_client: ContainerClient):
         container_name = _random_container_name()
         message = "test_message_stdin"
@@ -530,6 +555,7 @@ class TestDockerClient:
         finally:
             docker_client.remove_container(container_name)
 
+    @pytest.mark.failing_offline
     def test_exec_in_container_with_stdin(self, docker_client: ContainerClient, dummy_container):
         docker_client.start_container(dummy_container.container_id)
         message = "test_message_stdin"
@@ -542,6 +568,7 @@ class TestDockerClient:
 
         assert message == output.decode(config.DEFAULT_ENCODING).strip()
 
+    @pytest.mark.failing_offline
     def test_exec_in_container_with_stdin_stdout_stderr(
         self, docker_client: ContainerClient, dummy_container
     ):
@@ -557,6 +584,7 @@ class TestDockerClient:
         assert message == output.decode(config.DEFAULT_ENCODING).strip()
         assert "stderrtest" == stderr.decode(config.DEFAULT_ENCODING).strip()
 
+    @pytest.mark.failing_offline
     def test_run_detached_with_logs(self, docker_client: ContainerClient):
         container_name = _random_container_name()
         message = "test_message"
@@ -582,6 +610,7 @@ class TestDockerClient:
             "container_hopefully_does_not_exist", safe=True
         )
 
+    @pytest.mark.failing_offline
     def test_pull_docker_image(self, docker_client: ContainerClient):
         try:
             docker_client.get_image_cmd("alpine")
@@ -593,10 +622,12 @@ class TestDockerClient:
         docker_client.pull_image("alpine")
         assert "/bin/sh" == docker_client.get_image_cmd("alpine").strip()
 
+    @pytest.mark.failing_offline
     def test_pull_non_existent_docker_image(self, docker_client: ContainerClient):
         with pytest.raises(NoSuchImage):
             docker_client.pull_image("localstack_non_existing_image_for_tests")
 
+    @pytest.mark.failing_offline
     def test_pull_docker_image_with_tag(self, docker_client: ContainerClient):
         try:
             docker_client.get_image_cmd("alpine")
@@ -609,6 +640,7 @@ class TestDockerClient:
         assert "/bin/sh" == docker_client.get_image_cmd("alpine:3.13").strip()
         assert "alpine:3.13" in docker_client.inspect_image("alpine:3.13")["RepoTags"]
 
+    @pytest.mark.failing_offline
     def test_pull_docker_image_with_hash(self, docker_client: ContainerClient):
         try:
             docker_client.get_image_cmd("alpine")
@@ -633,6 +665,7 @@ class TestDockerClient:
             )["RepoDigests"]
         )
 
+    @pytest.mark.failing_offline
     def test_run_container_automatic_pull(self, docker_client: ContainerClient):
         try:
             safe_run([config.DOCKER_CMD, "rmi", "alpine"])
@@ -642,6 +675,7 @@ class TestDockerClient:
         stdout, _ = docker_client.run_container("alpine", command=["echo", message], remove=True)
         assert message == stdout.decode(config.DEFAULT_ENCODING).strip()
 
+    @pytest.mark.failing_offline
     def test_run_container_non_existent_image(self, docker_client: ContainerClient):
         try:
             safe_run([config.DOCKER_CMD, "rmi", "alpine"])
@@ -652,6 +686,7 @@ class TestDockerClient:
                 "localstack_non_existing_image_for_tests", command=["echo", "test"], remove=True
             )
 
+    @pytest.mark.failing_offline
     def test_running_container_names(self, docker_client: ContainerClient, dummy_container):
         docker_client.start_container(dummy_container.container_id)
         name = dummy_container.container_name
@@ -659,6 +694,7 @@ class TestDockerClient:
         docker_client.stop_container(name)
         assert name not in docker_client.get_running_container_names()
 
+    @pytest.mark.failing_offline
     def test_is_container_running(self, docker_client: ContainerClient, dummy_container):
         docker_client.start_container(dummy_container.container_id)
         name = dummy_container.container_name
@@ -666,6 +702,7 @@ class TestDockerClient:
         docker_client.stop_container(name)
         assert not docker_client.is_container_running(name)
 
+    @pytest.mark.failing_offline
     def test_docker_image_names(self, docker_client: ContainerClient):
         try:
             safe_run([config.DOCKER_CMD, "rmi", "alpine"])
@@ -680,6 +717,7 @@ class TestDockerClient:
         assert "alpine" in docker_client.get_docker_image_names()
         assert "alpine" not in docker_client.get_docker_image_names(strip_latest=False)
 
+    @pytest.mark.failing_offline
     def test_get_container_name(self, docker_client: ContainerClient, dummy_container):
         docker_client.start_container(dummy_container.container_id)
         assert dummy_container.container_name == docker_client.get_container_name(
@@ -691,6 +729,7 @@ class TestDockerClient:
         with pytest.raises(NoSuchContainer):
             docker_client.get_container_name(not_existent_container)
 
+    @pytest.mark.failing_offline
     def test_get_container_id(self, docker_client: ContainerClient, dummy_container):
         docker_client.start_container(dummy_container.container_id)
         assert dummy_container.container_id == docker_client.get_container_id(
@@ -702,6 +741,7 @@ class TestDockerClient:
         with pytest.raises(NoSuchContainer):
             docker_client.get_container_id(not_existent_container)
 
+    @pytest.mark.failing_offline
     def test_inspect_container(self, docker_client: ContainerClient, dummy_container):
         docker_client.start_container(dummy_container.container_id)
         for identifier in [dummy_container.container_id, dummy_container.container_name]:
@@ -711,6 +751,7 @@ class TestDockerClient:
                 == docker_client.inspect_container(identifier)["Name"]
             )
 
+    @pytest.mark.failing_offline
     def test_inspect_image(self, docker_client: ContainerClient):
         docker_client.pull_image("alpine")
         assert "alpine" in docker_client.inspect_image("alpine")["RepoTags"][0]
@@ -726,6 +767,7 @@ class TestDockerClient:
         with pytest.raises(NoSuchNetwork):
             docker_client.inspect_network(network_name)
 
+    @pytest.mark.failing_offline
     def test_copy_from_container(self, tmpdir, docker_client: ContainerClient, dummy_container):
         docker_client.start_container(dummy_container.container_id)
         local_path = tmpdir.join("test_file")
@@ -733,6 +775,7 @@ class TestDockerClient:
             local_path, local_path, "test_file", docker_client, dummy_container
         )
 
+    @pytest.mark.failing_offline
     def test_copy_from_container_to_different_file(
         self, tmpdir, docker_client: ContainerClient, dummy_container
     ):
@@ -742,6 +785,7 @@ class TestDockerClient:
             local_path, local_path, "test_file", docker_client, dummy_container
         )
 
+    @pytest.mark.failing_offline
     def test_copy_from_container_into_directory(
         self, tmpdir, docker_client: ContainerClient, dummy_container
     ):
@@ -778,6 +822,7 @@ class TestDockerClient:
         )
         assert "TEST_CONTENT" == file_path.read().strip()
 
+    @pytest.mark.failing_offline
     def test_run_with_additional_arguments(self, docker_client: ContainerClient):
         env_variable = "TEST_FLAG=test_str"
         stdout, _ = docker_client.run_container(
@@ -795,6 +840,7 @@ class TestDockerClient:
         assert env_variable in stdout
         assert "EXISTING_VAR=test_var" in stdout
 
+    @pytest.mark.failing_offline
     def test_run_with_additional_arguments_add_host(self, docker_client: ContainerClient):
         additional_flags = "--add-host sometest.localstack.cloud:127.0.0.1"
         stdout, _ = docker_client.run_container(
@@ -811,6 +857,7 @@ class TestDockerClient:
         with pytest.raises(NoSuchContainer):
             docker_client.get_container_ip("hopefully_non_existent_container_%s" % short_uid())
 
+    @pytest.mark.failing_offline
     def test_get_container_ip(self, docker_client: ContainerClient, dummy_container):
         docker_client.start_container(dummy_container.container_id)
         ip = docker_client.get_container_ip(dummy_container.container_id)
@@ -820,6 +867,7 @@ class TestDockerClient:
         )
         assert "127.0.0.1" != ip
 
+    @pytest.mark.failing_offline
     def test_get_container_ip_with_network(
         self, docker_client: ContainerClient, create_container, create_network
     ):
@@ -836,6 +884,7 @@ class TestDockerClient:
         )
         assert "127.0.0.1" != ip
 
+    @pytest.mark.failing_offline
     def test_set_container_workdir(self, docker_client: ContainerClient):
         result = docker_client.run_container("alpine", command=["pwd"], workdir="/tmp")
         assert "/tmp" == to_str(result[0]).strip()

@@ -5,6 +5,8 @@ import unittest
 import uuid
 from datetime import datetime
 
+import pytest
+
 from localstack import config
 from localstack.services.awslambda.lambda_utils import LAMBDA_RUNTIME_PYTHON36
 from localstack.services.events.events_listener import EVENTS_TMP_DIR
@@ -369,6 +371,7 @@ class EventsTest(unittest.TestCase):
         self.cleanup(bus_name_2)
         sqs_client.delete_queue(QueueUrl=queue_url)
 
+    @pytest.mark.failing_offline
     def test_put_events_with_target_lambda(self):
         rule_name = "rule-{}".format(short_uid())
         function_name = "lambda-func-{}".format(short_uid())

@@ -203,6 +203,7 @@ class TestStateMachine(unittest.TestCase):
         cls.lambda_client.delete_function(FunctionName=TEST_LAMBDA_NAME_3)
         cls.lambda_client.delete_function(FunctionName=TEST_LAMBDA_NAME_4)
 
+    @pytest.mark.failing_offline
     def test_create_choice_state_machine(self):
         state_machines_before = self.sfn_client.list_state_machines()["stateMachines"]
         role_arn = aws_stack.role_arn("sfn_role")
@@ -238,6 +239,7 @@ class TestStateMachine(unittest.TestCase):
         # clean up
         self.cleanup(sm_arn, state_machines_before)
 
+    @pytest.mark.failing_offline
     def test_create_run_map_state_machine(self):
         names = ["Bob", "Meg", "Joe"]
         test_input = [{"map": name} for name in names]
@@ -279,6 +281,7 @@ class TestStateMachine(unittest.TestCase):
         # clean up
         self.cleanup(sm_arn, state_machines_before)
 
+    @pytest.mark.failing_offline
     def test_create_run_state_machine(self):
         state_machines_before = self.sfn_client.list_state_machines()["stateMachines"]
 
@@ -317,6 +320,7 @@ class TestStateMachine(unittest.TestCase):
         # clean up
         self.cleanup(sm_arn, state_machines_before)
 
+    @pytest.mark.failing_offline
     def test_try_catch_state_machine(self):
         state_machines_before = self.sfn_client.list_state_machines()["stateMachines"]
 
@@ -353,6 +357,7 @@ class TestStateMachine(unittest.TestCase):
         # clean up
         self.cleanup(sm_arn, state_machines_before)
 
+    @pytest.mark.failing_offline
     def test_intrinsic_functions(self):
         state_machines_before = self.sfn_client.list_state_machines()["stateMachines"]
 

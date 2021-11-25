@@ -393,6 +393,7 @@ class SQSTest(unittest.TestCase):
         self.client.delete_queue(QueueUrl=queue_url)
         self.client.delete_queue(QueueUrl=dlq_info["QueueUrl"])
 
+    @pytest.mark.failing_offline
     def test_dead_letter_queue_execution(self):
         lambda_client = aws_stack.connect_to_service("lambda")
 
@@ -569,6 +570,7 @@ class SQSTest(unittest.TestCase):
         self.client.delete_queue(QueueUrl=nq)
         self.client.delete_queue(QueueUrl=dlq["QueueUrl"])
 
+    @pytest.mark.failing_offline
     def test_lambda_invoked_by_sqs_message_with_attributes(self):
         function_name = "lambda_func-{}".format(short_uid())
         queue_name = f"queue-{short_uid()}"
@@ -671,6 +673,7 @@ class SQSTest(unittest.TestCase):
         # clean up
         self.client.delete_queue(QueueUrl=queue_url)
 
+    @pytest.mark.failing_offline
     def test_lambda_invoked_by_sqs_message_with_delay_seconds(self):
         function_name = "lambda_func-{}".format(short_uid())
         queue_name = f"queue-{short_uid()}"
@@ -802,6 +805,7 @@ class SQSTest(unittest.TestCase):
         self.client.delete_queue(QueueUrl=queue_url)
         testutil.delete_lambda_function(func_name)
 
+    @pytest.mark.failing_offline
     def test_lambda_invoked_by_sqs_message_with_delay_seconds_dotnetcore2(self):
         zip_file = load_file(TEST_LAMBDA_DOTNETCORE2, mode="rb")
         handler = "DotNetCore2::DotNetCore2.Lambda.Function::SimpleFunctionHandler"
@@ -810,6 +814,7 @@ class SQSTest(unittest.TestCase):
             zip_file, handler, LAMBDA_RUNTIME_DOTNETCORE2
         )
 
+    @pytest.mark.failing_offline
     def test_lambda_invoked_by_sqs_message_with_delay_seconds_dotnetcore31(self):
         zip_file = load_file(TEST_LAMBDA_DOTNETCORE31, mode="rb")
         handler = "dotnetcore31::dotnetcore31.Function::FunctionHandler"
@@ -1670,6 +1675,7 @@ class TestSqsProvider:
 
         assert queue_url
 
+    @pytest.mark.failing_offline
     def test_dead_letter_queue_execution(
         self, sqs_client, sqs_create_queue, lambda_client, create_lambda_function
     ):
