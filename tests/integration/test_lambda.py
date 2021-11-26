@@ -387,7 +387,6 @@ class TestLambdaBaseFeatures(unittest.TestCase):
         result = run_safe(ddb_client.scan, TableName=db_table)
         self.assertEqual("non-existing-lambda", result["Items"][0]["function_name"]["S"])
 
-    @pytest.mark.failing_offline
     def test_dead_letter_queue(self):
         sqs_client = aws_stack.connect_to_service("sqs")
         lambda_client = aws_stack.connect_to_service("lambda")
@@ -449,12 +448,10 @@ class TestLambdaBaseFeatures(unittest.TestCase):
         sqs_client.delete_queue(QueueUrl=queue_url)
         lambda_client.delete_function(FunctionName=lambda_name)
 
-    @pytest.mark.failing_offline
     def test_success_destination(self):
         payload = {}
         _assess_lambda_destination_invocation("Success", payload, self)
 
-    @pytest.mark.failing_offline
     def test_failure_destination(self):
         payload = {lambda_integration.MSG_BODY_RAISE_ERROR_FLAG: 1}
         _assess_lambda_destination_invocation("RetriesExhausted", payload, self)
@@ -512,7 +509,6 @@ class TestLambdaBaseFeatures(unittest.TestCase):
         self.assertEqual(200, resp["ResponseMetadata"]["HTTPStatusCode"])
         lambda_client.delete_function(FunctionName=function_name)
 
-    @pytest.mark.failing_offline
     def test_large_payloads(self):
         function_name = "large_payload-{}".format(short_uid())
         testutil.create_lambda_function(
@@ -532,7 +528,6 @@ class TestLambdaBaseFeatures(unittest.TestCase):
         # clean up
         lambda_client.delete_function(FunctionName=function_name)
 
-    @pytest.mark.failing_offline
     def test_additional_docker_flags(self):
         if not use_docker():
             pytest.skip("not using docker executor")
@@ -1000,7 +995,6 @@ class TestPythonRuntimes(LambdaTestBase):
     def tearDownClass(cls):
         testutil.delete_lambda_function(TEST_LAMBDA_NAME_PY)
 
-    @pytest.mark.failing_offline
     def test_invocation_type_not_set(self):
         result = self.lambda_client.invoke(
             FunctionName=TEST_LAMBDA_NAME_PY, Payload=b"{}", LogType="Tail"
@@ -1048,7 +1042,6 @@ class TestPythonRuntimes(LambdaTestBase):
 
         self.assertEqual(204, result["StatusCode"])
 
-    @pytest.mark.failing_offline
     def test_lambda_environment(self):
         vars = {"Hello": "World"}
         testutil.create_lambda_function(
@@ -1123,7 +1116,6 @@ class TestPythonRuntimes(LambdaTestBase):
         # clean up
         testutil.delete_lambda_function(lambda_name)
 
-    @pytest.mark.failing_offline
     def test_http_invocation_with_apigw_proxy(self):
         lambda_name = "test_lambda_%s" % short_uid()
         lambda_resource = "/api/v1/{proxy+}"
@@ -1204,7 +1196,6 @@ class TestPythonRuntimes(LambdaTestBase):
         # clean up
         testutil.delete_lambda_function(lambda_name)
 
-    @pytest.mark.failing_offline
     def test_python_lambda_running_in_docker(self):
         if not use_docker():
             pytest.skip("not using docker executor")
@@ -1225,7 +1216,6 @@ class TestPythonRuntimes(LambdaTestBase):
         # clean up
         testutil.delete_lambda_function(TEST_LAMBDA_NAME_PY3)
 
-    @pytest.mark.failing_offline
     def test_handler_in_submodule(self):
         func_name = "lambda-%s" % short_uid()
         zip_file = testutil.create_lambda_archive(
@@ -1248,7 +1238,6 @@ class TestPythonRuntimes(LambdaTestBase):
         self.assertEqual(200, result["StatusCode"])
         self.assertEqual(json.loads("{}"), result_data["event"])
 
-    @pytest.mark.failing_offline
     def test_python3_runtime_multiple_create_with_conflicting_module(self):
         original_do_use_docker = lambda_api.DO_USE_DOCKER
         try:
@@ -1292,7 +1281,6 @@ class TestPythonRuntimes(LambdaTestBase):
         finally:
             lambda_api.DO_USE_DOCKER = original_do_use_docker
 
-    @pytest.mark.failing_offline
     def test_lambda_subscribe_sns_topic(self):
         function_name = "{}-{}".format(TEST_LAMBDA_FUNCTION_PREFIX, short_uid())
 
@@ -1328,7 +1316,6 @@ class TestPythonRuntimes(LambdaTestBase):
         self.assertIn("Subject", notification)
         self.assertEqual(subject, notification["Subject"])
 
-    @pytest.mark.failing_offline
     def test_lambda_send_message_to_sqs(self):
         function_name = "{}-{}".format(TEST_LAMBDA_FUNCTION_PREFIX, short_uid())
         queue_name = "lambda-queue-{}".format(short_uid())
@@ -1364,7 +1351,6 @@ class TestPythonRuntimes(LambdaTestBase):
         testutil.delete_lambda_function(function_name)
         sqs_client.delete_queue(QueueUrl=queue_url)
 
-    @pytest.mark.failing_offline
     def test_lambda_put_item_to_dynamodb(self):
         table_name = "ddb-table-{}".format(short_uid())
         function_name = "{}-{}".format(TEST_LAMBDA_FUNCTION_PREFIX, short_uid())
@@ -1401,7 +1387,6 @@ class TestPythonRuntimes(LambdaTestBase):
         dynamodb_client = aws_stack.connect_to_service("dynamodb")
         dynamodb_client.delete_table(TableName=table_name)
 
-    @pytest.mark.failing_offline
     def test_lambda_start_stepfunctions_execution(self):
         function_name = "{}-{}".format(TEST_LAMBDA_FUNCTION_PREFIX, short_uid())
         resource_lambda_name = "{}-{}".format(TEST_LAMBDA_FUNCTION_PREFIX, short_uid())
@@ -1513,7 +1498,6 @@ class TestPythonRuntimes(LambdaTestBase):
 
 
 class TestNodeJSRuntimes:
-    @pytest.mark.failing_offline
     def test_nodejs_lambda_running_in_docker(self, lambda_client, create_lambda_function):
         if not use_docker():
             pytest.skip("not using docker executor")
@@ -1546,7 +1530,6 @@ class TestNodeJSRuntimes:
         expected = [".*Node.js Lambda handler executing."]
         _check_lambda_logs(TEST_LAMBDA_NAME_JS, expected_lines=expected)
 
-    @pytest.mark.failing_offline
     def test_invoke_nodejs_lambda(self, lambda_client, create_lambda_function):
         handler_file = os.path.join(THIS_FOLDER, "lambdas", "lambda_handler.js")
         create_lambda_function(
@@ -1569,7 +1552,6 @@ class TestNodeJSRuntimes:
         events = get_lambda_log_events(TEST_LAMBDA_NAME_JS)
         assert len(events) > 0
 
-    @pytest.mark.failing_offline
     def test_invoke_nodejs_lambda_with_payload_containing_quotes(
         self, lambda_client, create_lambda_function
     ):
@@ -1664,7 +1646,6 @@ class TestDotNetCoreRuntimes(LambdaTestBase):
 
         testutil.delete_lambda_function(func_name)
 
-    @pytest.mark.failing_offline
     def test_dotnetcore2_lambda_running_in_docker(self):
         self.__run_test(
             func_name=TEST_LAMBDA_NAME_DOTNETCORE2,
@@ -1674,7 +1655,6 @@ class TestDotNetCoreRuntimes(LambdaTestBase):
             expected_lines=["Running .NET Core 2.0 Lambda"],
         )
 
-    @pytest.mark.failing_offline
     def test_dotnetcore31_lambda_running_in_docker(self):
         self.__run_test(
             func_name=TEST_LAMBDA_NAME_DOTNETCORE31,
@@ -1690,7 +1670,6 @@ class TestRubyRuntimes(LambdaTestBase):
     def setUpClass(cls):
         cls.lambda_client = aws_stack.connect_to_service("lambda")
 
-    @pytest.mark.failing_offline
     def test_ruby_lambda_running_in_docker(self):
         if not use_docker():
             pytest.skip("not using docker executor")
@@ -2049,7 +2028,6 @@ class TestDockerBehaviour(LambdaTestBase):
         cls.lambda_client = aws_stack.connect_to_service("lambda")
         cls.s3_client = aws_stack.connect_to_service("s3")
 
-    @pytest.mark.failing_offline
     def test_code_updated_on_redeployment(self):
         lambda_api.LAMBDA_EXECUTOR.cleanup()
 
