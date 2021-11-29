@@ -509,6 +509,7 @@ class TestLambdaBaseFeatures(unittest.TestCase):
         self.assertEqual(200, resp["ResponseMetadata"]["HTTPStatusCode"])
         lambda_client.delete_function(FunctionName=function_name)
 
+    @pytest.mark.failing_offline
     def test_large_payloads(self):
         function_name = "large_payload-{}".format(short_uid())
         testutil.create_lambda_function(
@@ -528,6 +529,7 @@ class TestLambdaBaseFeatures(unittest.TestCase):
         # clean up
         lambda_client.delete_function(FunctionName=function_name)
 
+    @pytest.mark.failing_offline
     def test_additional_docker_flags(self):
         if not use_docker():
             pytest.skip("not using docker executor")
