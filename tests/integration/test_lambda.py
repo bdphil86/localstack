@@ -1586,7 +1586,6 @@ class TestCustomRuntimes(LambdaTestBase):
     def setUpClass(cls):
         cls.lambda_client = aws_stack.connect_to_service("lambda")
 
-    @pytest.mark.failing_offline
     def test_provided_runtime_running_in_docker(self):
         if not use_docker():
             pytest.skip("not using docker executor")
