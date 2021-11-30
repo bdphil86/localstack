@@ -510,7 +510,7 @@ class TestLambdaBaseFeatures(unittest.TestCase):
         self.assertEqual(200, resp["ResponseMetadata"]["HTTPStatusCode"])
         lambda_client.delete_function(FunctionName=function_name)
 
-    @pytest.mark.failing_offline
+    @pytest.mark.failing_offline  # only failing in CI due to problems with huge log output
     def test_large_payloads(self):
         function_name = "large_payload-{}".format(short_uid())
         testutil.create_lambda_function(
@@ -530,7 +530,6 @@ class TestLambdaBaseFeatures(unittest.TestCase):
         # clean up
         lambda_client.delete_function(FunctionName=function_name)
 
-    @pytest.mark.failing_offline
     def test_additional_docker_flags(self):
         if not use_docker():
             pytest.skip("not using docker executor")
@@ -1067,7 +1066,6 @@ class TestPythonRuntimes(LambdaTestBase):
         # clean up
         testutil.delete_lambda_function(TEST_LAMBDA_NAME_ENV)
 
-    @pytest.mark.failing_offline
     def test_invocation_with_qualifier(self):
         lambda_name = "test_lambda_%s" % short_uid()
         bucket_name = "test-bucket-lambda2"
@@ -1163,7 +1161,6 @@ class TestPythonRuntimes(LambdaTestBase):
         # clean up
         testutil.delete_lambda_function(lambda_name)
 
-    @pytest.mark.failing_offline
     def test_upload_lambda_from_s3(self):
         lambda_name = "test_lambda_%s" % short_uid()
         bucket_name = "test-bucket-lambda"
@@ -1728,6 +1725,7 @@ class TestGolangRuntimes:
             testutil.delete_lambda_function(func_name)
 
 
+@pytest.mark.failing_offline  # due to the download of test dependencies in setUpClass
 class TestJavaRuntimes(LambdaTestBase):
     @classmethod
     def setUpClass(cls):
@@ -1790,7 +1788,6 @@ class TestJavaRuntimes(LambdaTestBase):
         testutil.delete_lambda_function(TEST_LAMBDA_NAME_JAVA_SERIALIZABLE)
         testutil.delete_lambda_function(TEST_LAMBDA_NAME_JAVA_KINESIS)
 
-    @pytest.mark.failing_offline
     def test_java_runtime(self):
         self.assertIsNotNone(self.test_java_jar)
 
@@ -1805,7 +1802,6 @@ class TestJavaRuntimes(LambdaTestBase):
         self.assertIn("LinkedHashMap", to_str(result_data))
         self.assertIsNotNone(result_data)
 
-    @pytest.mark.failing_offline
     def test_java_runtime_with_large_payload(self):
         self.assertIsNotNone(self.test_java_jar)
 
@@ -1819,7 +1815,6 @@ class TestJavaRuntimes(LambdaTestBase):
         self.assertIn("LinkedHashMap", to_str(result_data))
         self.assertIsNotNone(result_data)
 
-    @pytest.mark.failing_offline
     def test_java_runtime_with_lib(self):
         java_jar_with_lib = load_file(TEST_LAMBDA_JAVA_WITH_LIB, mode="rb")
 
@@ -1864,7 +1859,6 @@ class TestJavaRuntimes(LambdaTestBase):
             # clean up
             testutil.delete_lambda_function(lambda_name)
 
-    @pytest.mark.failing_offline
     def test_sns_event(self):
         result = self.lambda_client.invoke(
             FunctionName=TEST_LAMBDA_NAME_JAVA,
@@ -1874,7 +1868,6 @@ class TestJavaRuntimes(LambdaTestBase):
 
         self.assertEqual(202, result["StatusCode"])
 
-    @pytest.mark.failing_offline
     def test_ddb_event(self):
         result = self.lambda_client.invoke(
             FunctionName=TEST_LAMBDA_NAME_JAVA,
@@ -1884,7 +1877,6 @@ class TestJavaRuntimes(LambdaTestBase):
 
         self.assertEqual(202, result["StatusCode"])
 
-    @pytest.mark.failing_offline
     def test_kinesis_invocation(self):
         payload = (
             b'{"Records": [{'
@@ -1900,7 +1892,6 @@ class TestJavaRuntimes(LambdaTestBase):
         self.assertEqual(200, result["StatusCode"])
         self.assertEqual('"test "', to_str(result_data).strip())
 
-    @pytest.mark.failing_offline
     def test_kinesis_event(self):
         payload = (
             b'{"Records": [{'
@@ -1918,7 +1909,6 @@ class TestJavaRuntimes(LambdaTestBase):
         self.assertEqual(202, result["StatusCode"])
         self.assertEqual("", to_str(result_data).strip())
 
-    @pytest.mark.failing_offline
     def test_stream_handler(self):
         result = self.lambda_client.invoke(
             FunctionName=TEST_LAMBDA_NAME_JAVA_STREAM,
@@ -1929,7 +1919,6 @@ class TestJavaRuntimes(LambdaTestBase):
         self.assertEqual(200, result["StatusCode"])
         self.assertEqual("{}", to_str(result_data).strip())
 
-    @pytest.mark.failing_offline
     def test_serializable_input_object(self):
         result = self.lambda_client.invoke(
             FunctionName=TEST_LAMBDA_NAME_JAVA_SERIALIZABLE,
@@ -1943,7 +1932,6 @@ class TestJavaRuntimes(LambdaTestBase):
             {"validated": True, "bucket": "test_bucket", "key": "test_key"},
         )
 
-    @pytest.mark.failing_offline
     def test_trigger_java_lambda_through_sns(self):
         topic_name = "topic-%s" % short_uid()
         bucket_name = "bucket-%s" % short_uid()
@@ -2173,7 +2161,6 @@ class TestDockerBehaviour(LambdaTestBase):
         testutil.delete_lambda_function(func_name)
 
 
-@pytest.mark.failing_offline
 def test_kinesis_lambda_parallelism(lambda_client, kinesis_client):
     old_config = config.SYNCHRONOUS_KINESIS_EVENTS
     config.SYNCHRONOUS_KINESIS_EVENTS = False

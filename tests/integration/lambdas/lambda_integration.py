@@ -3,10 +3,9 @@ import json
 import logging
 import os
 from io import BytesIO
+from typing import Union
 
 import boto3.dynamodb.types
-
-from localstack.utils.common import to_bytes, to_str
 
 TEST_BUCKET_NAME = "test-bucket"
 KINESIS_STREAM_NAME = "test_stream_1"
@@ -21,6 +20,14 @@ ENDPOINT_URL = "http://%s:%s" % (
     os.environ["LOCALSTACK_HOSTNAME"],
     os.environ.get("EDGE_PORT", 4566),
 )
+
+
+def to_str(obj: Union[str, bytes], encoding: str = "utf-8", errors="strict") -> str:
+    return obj.decode(encoding, errors) if isinstance(obj, bytes) else obj
+
+
+def to_bytes(obj: Union[str, bytes], encoding: str = "utf-8", errors="strict") -> bytes:
+    return obj.encode(encoding, errors) if isinstance(obj, str) else obj
 
 
 # Subclass of boto's TypeDeserializer for DynamoDB
