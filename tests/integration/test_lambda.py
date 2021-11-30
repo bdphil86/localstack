@@ -448,6 +448,7 @@ class TestLambdaBaseFeatures(unittest.TestCase):
         sqs_client.delete_queue(QueueUrl=queue_url)
         lambda_client.delete_function(FunctionName=lambda_name)
 
+    @pytest.mark.failing_offline
     def test_success_destination(self):
         payload = {}
         _assess_lambda_destination_invocation("Success", payload, self)
